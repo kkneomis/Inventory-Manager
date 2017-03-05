@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block body %}
+ 	<br>
+	<br>
+	<br>
+	<br>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-4">
+				<div class="info-box">
+					<span class="info-box-icon bg-yellow"><i class="fa fa-files-o"></i></span>
+					<div class="info-box-content">
+						<span class="info-box-number">Upload a file</span> <span></span>
+						<form action="uploader" enctype="multipart/form-data" method="post">
+							<span><input name="file" type="file"><br>
+							<input type="submit" value="Upload" class="btn btn-primary"></span>
+						</form><span></span>
+					</div><!-- /.info-box-content -->
+				</div>
+			</div>
+			<div class="col-md-6">
+				<!-- Widget: user widget style 1 -->
+				<div class="box box-widget widget-user-2">
+					<!-- Add the bg color to the header using any of the bg-* classes -->
+					<div class="widget-user-header bg-yellow">
+						<h3 class="widget-user-username">Uploads</h3>
+						<h5 class="widget-user-desc">user supplied data</h5>
+					</div>
+					<div class="box-footer no-padding">
+						<ul class="nav nav-stacked">
+							<li style="list-style: none">{% for file in files %}</li>
+							<li>
+								<a href="uploads/{{ file }}">{{ file }}</a>
+							</li>
+							<li style="list-style: none">{% endfor %}</li>
+						</ul>
+					</div>
+				</div><!-- /.widget-user -->
+			</div><!-- /.row -->
+		</div>
+	</div>
+{% endblock %}
