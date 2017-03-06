@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block body %}
+
+
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        Data
+        <small>All data view</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">All Data</li>
+      </ol>
+    </section>
+
+    <section class="content">
+    <div class="row">
+        <div class="col-md-6">
+
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Commodities</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body no-padding">
+              <table class="table table-striped table-hover" id="commodities">
+                <tr>
+                  <th>Commodity ID</th>
+                  <th>Commodity Name</th>
+                </tr>
+                  {% for commodity in commodities %}
+                <tr>
+                  <td>{{ commodity.com_id }}</td>
+                  <td>{{ commodity.com_name }}</td>
+                </tr>
+                  {% endfor %}
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+        </div>
+        <div class="col-md-6">
+
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">CFG</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body no-padding">
+              <table class="table table-striped table-hover" id="cfgs">
+                <tr>
+                  <th>CFG Name</th>
+                  <th>Commodity Id</th>
+                </tr>
+                 {% for cfg in cfgs %}
+                <tr>
+                  <td>{{ cfg.cfg_name }}</td>
+                  <td>{{ cfg.com_id }}</td>
+                </tr>
+                  {% endfor %}
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+        </div>
+    </div>
+
+
+    </section>
+
+{% endblock %}
