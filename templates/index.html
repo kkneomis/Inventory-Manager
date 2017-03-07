@@ -25,10 +25,10 @@
             <div class="inner">
               <h3>150</h3>
 
-              <p>New Orders</p>
+              <p>Days Sales Inventory</p>
             </div>
             <div class="icon">
-              <i class="ion ion-bag"></i>
+              <i class="ion ion-stats-bars"></i>
             </div>
             <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
           </div>
@@ -38,12 +38,12 @@
           <!-- small box -->
           <div class="small-box bg-green">
             <div class="inner">
-              <h3>53<sup style="font-size: 20px">%</sup></h3>
+              <h3><sup style="font-size: 20px">$</sup>53,000</h3>
 
-              <p>Bounce Rate</p>
+              <p>Costs</p>
             </div>
             <div class="icon">
-              <i class="ion ion-stats-bars"></i>
+              <i class="ion ion-pricetags"></i>
             </div>
             <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
           </div>
@@ -83,27 +83,7 @@
       <!-- /.row -->
       <!-- Main row -->
       <div class="row">
-        <!-- Left col -->
-        <section class="col-lg-7 connectedSortable">
-          <!-- Custom tabs (Charts with tabs)-->
-          <div class="nav-tabs-custom">
-            <!-- Tabs within a box -->
-            <ul class="nav nav-tabs pull-right">
-              <li class="active"><a href="#revenue-chart" data-toggle="tab">Area</a></li>
-              <li><a href="#sales-chart" data-toggle="tab">Donut</a></li>
-              <li class="pull-left header"><i class="fa fa-inbox"></i> Sales</li>
-            </ul>
-            <div class="tab-content no-padding">
-              <!-- Morris chart - Sales -->
-              <div class="chart tab-pane active" id="revenue-chart" style="position: relative; height: 300px;"></div>
-              <div class="chart tab-pane" id="sales-chart" style="position: relative; height: 300px;"></div>
-            </div>
-          </div>
-          <!-- /.nav-tabs-custom -->
-
-
-        </section>
-        <!-- /.Left col -->
+        {%  for item in sales %}
         <!-- right col (We are only adding the ID to make the widgets sortable)-->
         <section class="col-lg-5 connectedSortable">
 
@@ -113,7 +93,7 @@
             <div class="box-header">
               <i class="fa fa-th"></i>
 
-              <h3 class="box-title">Sales Graph</h3>
+              <h3 class="box-title">{{ item[0]['cfg_name'] }}</h3>
 
               <div class="box-tools pull-right">
                 <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -123,38 +103,16 @@
               </div>
             </div>
             <div class="box-body border-radius-none">
-              <div class="chart" id="line-chart" style="height: 250px;"></div>
+              <div class="chart" id="line-chart{{ item[0]['cfg_name'] }}" style="height: 250px;"></div>
             </div>
             <!-- /.box-body -->
-            <div class="box-footer no-border">
-              <div class="row">
-                <div class="col-xs-4 text-center" style="border-right: 1px solid #f4f4f4">
-                  <input type="text" class="knob" data-readonly="true" value="20" data-width="60" data-height="60" data-fgColor="#39CCCC">
-
-                  <div class="knob-label">Mail-Orders</div>
-                </div>
-                <!-- ./col -->
-                <div class="col-xs-4 text-center" style="border-right: 1px solid #f4f4f4">
-                  <input type="text" class="knob" data-readonly="true" value="50" data-width="60" data-height="60" data-fgColor="#39CCCC">
-
-                  <div class="knob-label">Online</div>
-                </div>
-                <!-- ./col -->
-                <div class="col-xs-4 text-center">
-                  <input type="text" class="knob" data-readonly="true" value="30" data-width="60" data-height="60" data-fgColor="#39CCCC">
-
-                  <div class="knob-label">In-Store</div>
-                </div>
-                <!-- ./col -->
-              </div>
-              <!-- /.row -->
-            </div>
             <!-- /.box-footer -->
           </div>
           <!-- /.box -->
 
 
         </section>
+          {%  endfor %}
         <!-- right col -->
       </div>
       <!-- /.row (main row) -->
@@ -176,7 +134,7 @@ $(function () {
 
   "use strict";
 
-  //Make the dashboard widgets sortable Using jquery UI
+    //Make the dashboard widgets sortable Using jquery UI
   $(".connectedSortable").sortable({
     placeholder: "sort-highlight",
     connectWith: ".connectedSortable",
@@ -186,72 +144,15 @@ $(function () {
   });
   $(".connectedSortable .box-header, .connectedSortable .nav-tabs-custom").css("cursor", "move");
 
-  //jQuery UI sortable for the todo list
-  $(".todo-list").sortable({
-    placeholder: "sort-highlight",
-    handle: ".handle",
-    forcePlaceholderSize: true,
-    zIndex: 999999
-  });
 
-
-  /* jQueryKnob */
-  $(".knob").knob();
-
-
-
-
-  /* Morris.js Charts */
-  // Sales chart
-  var area = new Morris.Area({
-    element: 'revenue-chart',
-    resize: true,
-    data: [
-      {y: '2011 Q1', item1: 2666, item2: 2666},
-      {y: '2011 Q2', item1: 2778, item2: 2294},
-      {y: '2011 Q3', item1: 4912, item2: 1969},
-      {y: '2011 Q4', item1: 3767, item2: 3597},
-      {y: '2012 Q1', item1: 6810, item2: 1914},
-      {y: '2012 Q2', item1: 5670, item2: 4293},
-      {y: '2012 Q3', item1: 4820, item2: 3795},
-      {y: '2012 Q4', item1: 15073, item2: 5967},
-      {y: '2013 Q1', item1: 10687, item2: 4460},
-      {y: '2013 Q2', item1: 8432, item2: 5713}
-    ],
-    xkey: 'y',
-    ykeys: ['item1', 'item2'],
-    labels: ['Item 1', 'Item 2'],
-    lineColors: ['#a0d0e0', '#3c8dbc'],
-    hideHover: 'auto'
-  });
+  {%  for item in sales %}
   var line = new Morris.Line({
-    element: 'line-chart',
+    element: 'line-chart{{ item[0]['cfg_name'] }}',
     resize: true,
-    data: [
-      {y: '2011 Q1', item1: 2666},
-      {y: '2011 Q2', item1: 2778},
-      {y: '2011 Q3', item1: 4912},
-      {y: '2011 Q4', item1: 3767},
-      {y: '2012 Q1', item1: 6810},
-      {y: '2012 Q2', item1: 5670},
-      {y: '2012 Q3', item1: 4820},
-      {y: '2012 Q4', item1: 15073},
-      {y: '2013 Q1', item1: 10687},
-      {y: '2013 Q2', item1: 8432},
-        {y: '2011 Q1', item2: 266},
-      {y: '2011 Q2', item2: 27783},
-      {y: '2011 Q3', item2: 492},
-      {y: '2011 Q4', item2: 37637},
-      {y: '2012 Q1', item2: 680},
-      {y: '2012 Q2', item2: 56730},
-      {y: '2012 Q3', item2: 420},
-      {y: '2012 Q4', item2: 150733},
-      {y: '2013 Q1', item2: 1067},
-      {y: '2013 Q2', item2: 84322}
-    ],
-    xkey: 'y',
-    ykeys: ['item1', 'item2'],
-    labels: ['Item 1', 'Item 2' +
+    data: {{ item|tojson }},
+    xkey: 'week_id',
+    ykeys: ['entry_value'],
+    labels: ['Sales' +
     '' +
     ''],
     lineColors: ['#efefef'],
@@ -265,27 +166,10 @@ $(function () {
     gridTextFamily: "Open Sans",
     gridTextSize: 10
   });
+   {%  endfor %}
 
-  //Donut Chart
-  var donut = new Morris.Donut({
-    element: 'sales-chart',
-    resize: true,
-    colors: ["#3c8dbc", "#f56954", "#00a65a"],
-    data: [
-      {label: "Downloaàd Sales", value: 12},
-      {label: "In-Store Sales", value: 30},
-      {label: "Mail-Order Sales", value: 20}
-    ],
-    hideHover: 'auto'
-  });
-
-  //Fix for charts under tabs
-  $('.box ul.nav a').on('shown.bs.tab', function () {
-    area.redraw();
-    donut.redraw();
-    line.redraw();
-  });
 
 });
     </script>
+
 {% endblock %}

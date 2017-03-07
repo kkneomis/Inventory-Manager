@@ -1,10 +1,13 @@
 import os
 import csv
+import json
 import sqlite3
 import load_csv as lc
+import data_search as ds
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, \
     flash, g
 from werkzeug import secure_filename
+
 
 app = Flask(__name__)
 
@@ -34,7 +37,17 @@ def allowed_file(filename):
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    db = get_db()
+    cur = db.execute('SELECT * FROM cfg')
+    cfgs = cur.fetchall()
+
+    all_sales_data = []
+
+    for item in cfgs:
+        cfg = item['cfg_name']
+        all_sales_data.append(ds.actual_sales(cfg))
+
+    return render_template('index.html', sales=all_sales_data, cfg='')
 
 
 @app.route('/upload')
@@ -74,9 +87,9 @@ def process_file():
         # the upload folder we setup
         try:
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            flash("Your file was saved")
+            flash("Your file was saved!")
         except:
-            print 'File not valid'
+            print 'File not valid.'
             pass
 
         try:
@@ -84,20 +97,19 @@ def process_file():
             sql_filename = filename.split('.')[0] + '.sql'
             with open(os.path.join(app.config['SQL_FOLDER'], sql_filename), 'w') as file:
                 file.write(str(sql))
-                try:
-                    init_db('sql/fpm_Flat_Panel_Monitor.sql')
-                except:
-                    print "running the sql did not work"
 
-            flash("Your data has been imported")
+            init_db('sql/'+sql_filename)
+
+            flash("Your data has been imported.")
         except:
             print "it did not work"
-            flash('loading sql from csv did not work...try again')
+            flash('Loading sql from csv did not work :(...try again')
+
 
         # Redirect the user to the upload page
         return redirect(url_for('upload_file'))
     else:
-        flash("Not a valid file format. Only CSV files are allowed")
+        flash("Not a valid file format. Only CSV files are allowed.")
         return redirect(url_for('upload_file'))
 
 
@@ -122,11 +134,44 @@ def make_tree(path):
     return []
 
 
+@app.route('/commodity/<com_id>')
+def commodity(com_id=''):
+    db = get_db()
+    cur= db.execute('select * from commodity')
+    commodities = cur.fetchall()
+    cur = db.execute('select * from commodity where com_id = (?)', [com_id])
+    commodity = cur.fetchall()
+    cur = db.execute('select * from cfg where com_id = ?', [commodity[0]['com_id']])
+    cfgs = cur.fetchall()
+
+    #this should instead be the logic for grouping DSI
+    cur = db.execute('select * from cfg where length(cfg_name) < 14 and com_id = ?', [commodity[0]['com_id']])
+    group1= cur.fetchall()
+    cur = db.execute('select * from cfg where length(cfg_name) < 17 and \
+                      length(cfg_name) > 14 and com_id = ?', [commodity[0]['com_id']])
+    group2 = cur.fetchall()
+    cur = db.execute('select * from cfg where length(cfg_name) > 17 and com_id = ?', [commodity[0]['com_id']])
+    group3 = cur.fetchall()
+
+
+    return render_template('commodity.html', commodity=commodity, \
+                           commodities=commodities, cfgs=cfgs, \
+                           group1=group1, group2=group2, group3=group3)
+
+
+def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
+
 # database config
 def connect_db():
     """Connects to the specific database."""
     rv = sqlite3.connect(app.config['DATABASE'])
-    rv.row_factory = sqlite3.Row
+    rv.row_factory = dict_factory
+    rv.text_factory = str
     return rv
 
 
@@ -157,8 +202,6 @@ def init_db(file):
 def initdb_command():
     """Initializes the database."""
     init_db('tables.sql')
-    #init_db('sql/hdd_Hard_Drive.sql')
-    #init_db('sql/fpm_Flat_Panel_Monitor.sql')
 
     print 'Initialized the database.'
 
