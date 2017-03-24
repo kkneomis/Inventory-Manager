@@ -47,7 +47,9 @@ def home():
         cfg = item['cfg_name']
         all_sales_data.append(ds.actual_sales(cfg))
 
-    return render_template('index.html', sales=all_sales_data, cfg='')
+    print all_sales_data
+
+    return render_template('index.html', sales=all_sales_data)
 
 
 @app.route('/upload')

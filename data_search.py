@@ -1,15 +1,14 @@
 import dsi_calculator as dsi
-import json
-import datetime
 
 def actual_sales(cfg):
+    print cfg
     db  = dsi.get_db()
     cur = db.execute('select week.week_id, forecast.forecast_id, forecast.forecast_type, forecast.cfg_name, entry.entry_value \
                       from forecast, entry, week \
                       where forecast_type == "actual" \
                       and forecast.forecast_id = entry.forecast_id \
                       and week.week_id = entry.week_id \
-                      and forecast.cfg_name ==  ?', [cfg])
+                      and forecast.cfg_name ==  (?)', [cfg])
 
     sales = cur.fetchall()
     sales = cheat(sales)
