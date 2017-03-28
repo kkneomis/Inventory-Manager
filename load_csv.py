@@ -12,7 +12,7 @@ def get_inserts(file):
     line = get_commodity(file)
     # we don't want .csv extension
     # print "INSERT INTO commodity(com_id, com_name) VALUES ('%s', '%s');" % (line[0], line[1].split('.')[0])
-    queries += "INSERT INTO commodity(com_id, com_name) VALUES ('%s', '%s');\n" % (line[0], line[1])
+    queries += "INSERT INTO commodity(com_id, com_name) VALUES ('%s', '%s');\n" % (line[0], (" ").join(line[1:]).replace(".csv", ""))
 
     # get the CFG inserts
     for cfg in get_cfg(file):

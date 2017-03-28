@@ -1,0 +1,108 @@
+{% extends "layout.html" %}
+{% block body %}
+    <style>
+     .well-head{
+         background: #367fa9;
+         color: #fff;
+         text-align: center;
+     }
+    </style>
+      <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        Cfg
+        <small>cfg</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li><a href="#"><i class="fa fa-dashboard"></i> Commodities</a></li>
+        <li class="active">cfg</li>
+      </ol>
+    </section>
+
+    <section class="content">
+         <div class="row">
+        <div class="col-md-3">
+
+          <div class="box box-danger">
+            <div class="box-header">
+              <h3 class="box-title">Control Panel</h3>
+            </div>
+            <div class="box-body">
+            <form action="#" >
+                  <div class="form-group">
+                    <label>Common Functional Group</label>
+                    <select class="form-control select2"  id="dynamic_select" style="width: 100%;">
+                       <option value="" selected>Pick a cfg</option>
+                        {% for cfg in cfgs %}
+                            <option value="{{ cfg.cfg_id }}">{{ cfg.cfg_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Lead time (days)</label>
+                    <input type="number" name="lead_time" class="form-control" value="1">
+                  </div>
+                  <div class="form-group">
+                    <label>Service Level</label>
+                    <select class="form-control select2" style="width: 100%;">
+                        <option value=".90">90%</option>
+                        <option value=".95">95%</option>
+                        <option value=".98">98%</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Forecast (days)</label>
+                    <input type="number" name="forecast" class="form-control" value="1">
+                  </div>
+
+                    <input type="submit" class="btn btn-primary btn-block" value="Calculate">
+                </form>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+
+        </div>
+        <div class="col-md-9">
+
+          <div class="box box-danger">
+            <div class="box-header">
+              <h3 class="box-title">Output</h3>
+            </div>
+            <div class="box-body">
+                <p><strong>Standard Deviation: </strong>{{ stat_values.stv_dev }}</p>
+                <p><strong>Average demand: </strong>{{ stat_values.avg_demand }}</p>
+                <p><strong>Total demand: </strong>{{ stat_values.total_demand }}</p>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+
+        </div>
+        <!-- /.col (left) -->
+         </div>
+    </section>
+
+
+
+
+
+    <script>
+      $(function () {
+          //Initialize Select2 Elements
+          $(".select2").select2();
+      });
+
+    $(function(){
+      // bind change event to select
+      $('#dynamic_select').on('change', function () {
+          var url = $(this).val(); // get selected value
+          if (url) { // require a URL
+              window.location = url; // redirect
+          }
+          return false;
+      });
+    });
+</script>
+{% endblock %}

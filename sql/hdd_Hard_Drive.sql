@@ -1,4 +1,4 @@
-INSERT INTO commodity(com_id, com_name) VALUES ('hdd', 'Hard');
+INSERT INTO commodity(com_id, com_name) VALUES ('hdd', 'Hard Drive');
 INSERT INTO cfg(cfg_name, com_id) VALUES ('Hard Drive - Desktop_COMM', 'hdd');
 INSERT INTO cfg(cfg_name, com_id) VALUES ('HDD_4TB_SATA_6G_DT_CFG', 'hdd');
 INSERT INTO cfg(cfg_name, com_id) VALUES ('HDD_1TB_SATA_6G_DT_CFG', 'hdd');

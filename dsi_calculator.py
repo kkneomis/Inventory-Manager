@@ -1,6 +1,7 @@
 import os
 import csv
 import json
+import statistics
 import sqlite3
 import load_csv as lc
 import data_search as ds
@@ -134,6 +135,40 @@ def make_tree(path):
         return lst
 
     return []
+
+
+@app.route('/cfg')
+def cfg():
+    db = get_db()
+    cur = db.execute('SELECT * FROM cfg')
+    cfgs = cur.fetchall()
+    cur = db.execute('SELECT entry.entry_value FROM entry, forecast \
+                      WHERE forecast.forecast_id = entry.forecast_id  \
+                      AND forecast.cfg_name == "FP_S2417DG_R_CFG" \
+                      AND forecast.forecast_type == "actual";')
+
+    entries = cur.fetchall()
+    print entries
+
+    cfg_values = get_list_dict_values(entries)
+    stat_values = {}
+    stat_values['stv_dev'] =  statistics.stdev(cfg_values)
+    stat_values['avg_demand'] = statistics.mean(cfg_values)
+    stat_values['total_demand'] = sum(cfg_values)
+
+    return render_template('cfg.html', cfgs=cfgs, stat_values=stat_values)
+
+
+def get_list_dict_values(entries):
+    '''
+    input is a list of key pair values
+    :return: list of values
+    '''
+    cfg_values = []
+    for entry in entries:
+        cfg_values.append(entry['entry_value'])
+    return cfg_values
+
 
 
 @app.route('/commodity/<com_id>')
