@@ -56,6 +56,7 @@
               <h3>44</h3>
 
               <p>User Registrations</p>
+              <p>User Registrations</p>
             </div>
             <div class="icon">
               <i class="ion ion-person-add"></i>
@@ -93,7 +94,7 @@
             <div class="box-header">
               <i class="fa fa-th"></i>
 
-              <h3 class="box-title">{{ item[0]['cfg_name'] }}</h3>
+              <h3 class="box-title">{{ item['cfg_name'] }}</h3>
 
               <div class="box-tools pull-right">
                 <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -103,7 +104,7 @@
               </div>
             </div>
             <div class="box-body border-radius-none">
-              <div class="chart" id="line-chart{{ item[0]['cfg_name'] }}" style="height: 250px;"></div>
+              <div class="chart" id="line-chart{{ item['cfg_name'] }}" style="height: 250px;"></div>
             </div>
             <!-- /.box-body -->
             <!-- /.box-footer -->
@@ -147,7 +148,7 @@ $(function () {
 
   {%  for item in sales %}
   var line = new Morris.Line({
-    element: 'line-chart{{ item[0]['cfg_name'] }}',
+    element: 'line-chart{{ item['cfg_name'] }}',
     resize: true,
     data: {{ item|tojson }},
     xkey: 'week_id',

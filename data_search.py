@@ -1,7 +1,11 @@
 import dsi_calculator as dsi
 
 def actual_sales(cfg):
-    print cfg
+    '''
+    get sales and forecast data for a given cfg
+    :param cfg:
+    :return: json of sales/forecast data
+    '''
     db  = dsi.get_db()
     cur = db.execute('select week.week_id, forecast.forecast_id, forecast.forecast_type, forecast.cfg_name, entry.entry_value \
                       from forecast, entry, week \

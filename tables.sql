@@ -15,6 +15,7 @@ create table cfg(
 drop table if exists forecast;
 create table forecast(
     forecast_id VARCHAR(255) PRIMARY KEY,
+    forecast_site VARCHAR(255) NOT NULL,
     cfg_name VARCHAR(255) NOT NULL,
     version_name VARCHAR(255) NOT NULL,
     forecast_type VARCHAR(255) NOT NULL,

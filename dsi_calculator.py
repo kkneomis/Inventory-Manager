@@ -1,9 +1,10 @@
 import os
-import csv
-import json
+import math
 import statistics
 import sqlite3
 import load_csv as lc
+from scipy.stats import norm
+import requests
 import data_search as ds
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, \
     flash, g
@@ -44,19 +45,20 @@ def home():
 
     all_sales_data = []
 
-    for item in cfgs:
-        cfg = item['cfg_name']
-        all_sales_data.append(ds.actual_sales(cfg))
+    #for item in cfgs:
+    #    cfg = item['cfg_name']
+    #    all_sales_data.append(ds.actual_sales(cfg))
 
-    print all_sales_data
 
-    return render_template('index.html', sales=all_sales_data)
+    return render_template('index.html', sales=[])
 
 
 @app.route('/upload')
 def upload_file():
-    #myfile = lc.get_inserts(os.path.join(app.config['UPLOAD_FOLDER'], 'hdd_Hard_Drive.csv'))
-    #print myfile
+    '''
+    Upload a csv file
+    Expects a file with waterfall forecast data
+    '''
     files = make_tree(app.config['UPLOAD_FOLDER'])
     return render_template('upload.html', files=files)
 
@@ -138,25 +140,86 @@ def make_tree(path):
 
 
 @app.route('/cfg')
-def cfg():
+def cfg(cfg_name="FP_S2240T_R_CFG_LAX_Site", lead_time="1", service_level="90", forecast="100"):
+    '''
+    Take in a cfg and output inventory level and dsi
+    :param cfg_name:
+    :param site:
+    :return:
+    '''
+
+    # getting new parameters from the url
+    # the come as tuples
+    if request.args.get('cfg_name'):
+        cfg_name = request.args.get('cfg_name')
+        lead_time = request.args.get('lead_time')[0][0],
+        service_level = request.args.get('service_level'),
+        forecast = request.args.get('forecast')
+
+    # first we get the data we need from the database
     db = get_db()
     cur = db.execute('SELECT * FROM cfg')
     cfgs = cur.fetchall()
     cur = db.execute('SELECT entry.entry_value FROM entry, forecast \
                       WHERE forecast.forecast_id = entry.forecast_id  \
-                      AND forecast.cfg_name == "FP_S2417DG_R_CFG" \
-                      AND forecast.forecast_type == "actual";')
+                      AND forecast.cfg_name == (?) \
+                      AND forecast.forecast_type == "actual";', [cfg_name])
 
     entries = cur.fetchall()
-    print entries
 
+
+    # here we are doing the actual calculations
     cfg_values = get_list_dict_values(entries)
     stat_values = {}
-    stat_values['stv_dev'] =  statistics.stdev(cfg_values)
-    stat_values['avg_demand'] = statistics.mean(cfg_values)
-    stat_values['total_demand'] = sum(cfg_values)
+
+    stat_values['cfg_name'] = cfg_name
+    stat_values['service_level'] = float(service_level[0])/100
+    stat_values['lead_time'] = int(lead_time[0])
+    stat_values['forecast'] = int(forecast)
+
+    try:
+        stat_values['stv_dev'] =  statistics.pstdev(cfg_values)/5
+        stat_values['avg_demand'] = (sum(cfg_values)/len(cfg_values))/5
+        stat_values['total_demand'] = sum(cfg_values)/5
+        stat_values['safety_stock'] =  (stat_values['stv_dev']  \
+                                       * norm.ppf(stat_values['service_level']) \
+                                       * (math.sqrt(stat_values['lead_time'])+1))  \
+                                       + (stat_values['avg_demand']*(stat_values['lead_time']+1))
+        print (stat_values['avg_demand']*(stat_values['lead_time']+1))
+        stat_values['inventory'] = stat_values['safety_stock'] + stat_values['forecast']
+        stat_values['reorder'] = stat_values['avg_demand'] * stat_values['lead_time'] \
+                                 + stat_values['service_level'] * stat_values['stv_dev'] \
+                                 * math.sqrt(stat_values['lead_time'])
+        stat_values['dsi'] = stat_values['inventory']/stat_values['forecast']
+    except:
+        # if the math fails, we'll set everything so 0 to avoid an errors
+        stat_values['stv_dev'] = 0
+        stat_values['avg_demand'] = 0
+        stat_values['total_demand'] = 0
+        stat_values['safety_stock'] = 0
+        stat_values['inventory'] = 0
+        stat_values['dsi'] = 0
+        print "failed in calculations"
 
     return render_template('cfg.html', cfgs=cfgs, stat_values=stat_values)
+
+@app.route('/cfg_vars', methods=['POST'])
+def cfg_vars():
+    '''
+    get methods from cfg form
+    :return:
+    '''
+    cfg_name =  request.form['cfg_name']
+    lead_time = request.form['lead_time']
+    service_level = request.form['service_level']
+    forecast = request.form['forecast']
+
+    return redirect(url_for('cfg',
+                            cfg_name = cfg_name,
+                            lead_time = lead_time,
+                            service_level = service_level,
+                            forecast = forecast
+                            ))
 
 
 def get_list_dict_values(entries):
@@ -178,22 +241,15 @@ def commodity(com_id=''):
     commodities = cur.fetchall()
     cur = db.execute('select * from commodity where com_id = (?)', [com_id])
     commodity = cur.fetchall()
-    cur = db.execute('select * from cfg where com_id = ?', [commodity[0]['com_id']])
-    cfgs = cur.fetchall()
+
 
     #this should instead be the logic for grouping DSI
-    cur = db.execute('select * from cfg where length(cfg_name) < 14 and com_id = ?', [commodity[0]['com_id']])
-    group1= cur.fetchall()
-    cur = db.execute('select * from cfg where length(cfg_name) < 17 and \
-                      length(cfg_name) > 14 and com_id = ?', [commodity[0]['com_id']])
-    group2 = cur.fetchall()
-    cur = db.execute('select * from cfg where length(cfg_name) > 17 and com_id = ?', [commodity[0]['com_id']])
-    group3 = cur.fetchall()
-
+    cur = db.execute('select * from cfg where com_id = ?', [commodity[0]['com_id']])
+    cfgs= cur.fetchall()
 
     return render_template('commodity.html', commodity=commodity, \
-                           commodities=commodities, cfgs=cfgs, \
-                           group1=group1, group2=group2, group3=group3)
+                           commodities=commodities, \
+                           cfgs=cfgs)
 
 
 def dict_factory(cursor, row):
@@ -239,7 +295,6 @@ def init_db(file):
 def initdb_command():
     """Initializes the database."""
     init_db('tables.sql')
-
     print 'Initialized the database.'
 
 

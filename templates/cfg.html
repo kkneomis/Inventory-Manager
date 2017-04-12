@@ -22,38 +22,34 @@
 
     <section class="content">
          <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-4">
 
           <div class="box box-danger">
             <div class="box-header">
               <h3 class="box-title">Control Panel</h3>
             </div>
             <div class="box-body">
-            <form action="#" >
+            <form action="{{ url_for('cfg_vars') }}"  method="post" >
                   <div class="form-group">
                     <label>Common Functional Group</label>
-                    <select class="form-control select2"  id="dynamic_select" style="width: 100%;">
-                       <option value="" selected>Pick a cfg</option>
+                    <select name="cfg_name" class="form-control select2" id="dynamic_select" style="width: 100%;">
+                         <option value="{{ stat_values.cfg_name }}">{{ stat_values.cfg_name }}</option>
                         {% for cfg in cfgs %}
-                            <option value="{{ cfg.cfg_id }}">{{ cfg.cfg_name }}</option>
-                      {% endfor %}
+                            <option value="{{ cfg.cfg_name }}">{{ cfg.cfg_name }}</option>
+                        {% endfor %}
                     </select>
                   </div>
                   <div class="form-group">
                     <label>Lead time (days)</label>
-                    <input type="number" name="lead_time" class="form-control" value="1">
+                    <input type="number" name="lead_time" class="form-control" value="{{ stat_values.lead_time }}">
                   </div>
                   <div class="form-group">
-                    <label>Service Level</label>
-                    <select class="form-control select2" style="width: 100%;">
-                        <option value=".90">90%</option>
-                        <option value=".95">95%</option>
-                        <option value=".98">98%</option>
-                    </select>
+                    <label>Service Level (%)</label>
+                    <input type="number" name="service_level" class="form-control" value="{{ stat_values.service_level*100 }}">
                   </div>
                   <div class="form-group">
                     <label>Forecast (days)</label>
-                    <input type="number" name="forecast" class="form-control" value="1">
+                    <input type="number" name="forecast" class="form-control" value="{{ stat_values.forecast }}">
                   </div>
 
                     <input type="submit" class="btn btn-primary btn-block" value="Calculate">
@@ -64,16 +60,75 @@
           <!-- /.box -->
 
         </div>
-        <div class="col-md-9">
+        <div class="col-md-8">
 
           <div class="box box-danger">
             <div class="box-header">
-              <h3 class="box-title">Output</h3>
+              <h3 class="box-title">Output: {{ stat_values.cfg_name }}</h3>
             </div>
             <div class="box-body">
-                <p><strong>Standard Deviation: </strong>{{ stat_values.stv_dev }}</p>
-                <p><strong>Average demand: </strong>{{ stat_values.avg_demand }}</p>
-                <p><strong>Total demand: </strong>{{ stat_values.total_demand }}</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-aqua"><i class="ion ion-ios-gear-outline"></i></span>
+
+                            <div class="info-box-content">
+                              <span class="info-box-text">Standard Deviation</span>
+                              <span class="info-box-number">{{ "{0:,.2f}".format(stat_values.stv_dev) }}</span>
+                                <br>
+                                <span class="info-box-text">Average demand</span>
+                              <span class="info-box-number">{{ "{0:,.2f}".format(stat_values.avg_demand) }}</span>
+                                <br>
+                                <span class="info-box-text">Total demand</span>
+                              <span class="info-box-number">{{ "{0:,.2f}".format(stat_values.total_demand) }}</span>
+                                <br>
+                                <span class="info-box-text">Safety Stock</span>
+                              <span class="info-box-number">{{ "{0:,.2f}".format(stat_values.safety_stock) }}</span>
+                                <br>
+                                <span class="info-box-text">Reorder Point</span>
+                              <span class="info-box-number">{{ "{0:,.2f}".format(stat_values.reorder) }}</span>
+                            </div>
+                            <!-- /.info-box-content -->
+                          </div>
+
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-box bg-yellow">
+                            <span class="info-box-icon"><i class="ion ion-ios-pricetag-outline"></i></span>
+
+                            <div class="info-box-content">
+                              <span class="info-box-text">Inventory</span>
+                              <span class="info-box-number">{{ "{0:,.2f}".format(stat_values.inventory) }}</span>
+
+                              <div class="progress">
+                                <div class="progress-bar" style="width: 50%"></div>
+                              </div>
+                             <span class="progress-description">You need to carry <br> this much inventory</span>
+                        </div>
+                    <!-- /.info-box-content -->
+                    </div>
+                        <div class="info-box bg-green">
+                            <span class="info-box-icon"><i class="ion ion-ios-clock-outline"></i></span>
+
+                            <div class="info-box-content">
+                              <span class="info-box-text">DSI</span>
+                              <span class="info-box-number">{{ "{0:,.2f}".format(stat_values.dsi) }}</span>
+
+                              <div class="progress">
+                                <div class="progress-bar" style="width: 50%"></div>
+                              </div>
+                               <span class="progress-description">This is how long it takes<br> for your inventory to turn over</span>
+                        </div>
+                    <!-- /.info-box-content -->
+                    </div>
+                     </div>
+                </div>
+
+
+
+
+
+                </div>
             </div>
             <!-- /.box-body -->
           </div>
@@ -94,15 +149,6 @@
           $(".select2").select2();
       });
 
-    $(function(){
-      // bind change event to select
-      $('#dynamic_select').on('change', function () {
-          var url = $(this).val(); // get selected value
-          if (url) { // require a URL
-              window.location = url; // redirect
-          }
-          return false;
-      });
-    });
+
 </script>
 {% endblock %}
