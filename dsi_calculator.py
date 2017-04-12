@@ -3,6 +3,7 @@ import math
 import statistics
 import sqlite3
 import load_csv as lc
+import json
 from scipy.stats import norm
 import requests
 import data_search as ds
@@ -45,9 +46,9 @@ def home():
 
     all_sales_data = []
 
-    #for item in cfgs:
-    #    cfg = item['cfg_name']
-    #    all_sales_data.append(ds.actual_sales(cfg))
+    #cfg = cfgs[0]['cfg_name']
+    #json_data = ds.actual_sales(cfg)
+
 
 
     return render_template('index.html', sales=[])
@@ -156,27 +157,51 @@ def cfg(cfg_name="FP_S2240T_R_CFG_LAX_Site", lead_time="1", service_level="90", 
         service_level = request.args.get('service_level'),
         forecast = request.args.get('forecast')
 
-    # first we get the data we need from the database
+    #get the list of cfgs so that we can choose
     db = get_db()
     cur = db.execute('SELECT * FROM cfg')
     cfgs = cur.fetchall()
+
+    # perform the calculations
+    stat_values = get_cfg_stats(cfg_name, int(lead_time[0]), float(service_level[0]), int(forecast))
+    graph_data =  ds.actual_sales(cfg_name)
+
+    #we want to visualize our recommendation
+    #this allows us to graph the recommended inventory level
+    for item in graph_data:
+        item['rec_inventory'] = int(stat_values['inventory'])
+
+    return render_template('cfg.html', cfgs=cfgs, stat_values=stat_values, graph_data=graph_data)
+
+
+
+def get_cfg_stats(cfg_name, lead_time, service_level, forecast):
+    '''
+    Take in a cfg and some parameters
+    This is where the math the formula is done
+    Return a dictionary including inventory and dsi
+    :param cfg_name:
+    :param lead_time:
+    :param service_level:
+    :param forecast:
+    :return:
+    '''
+    # first we get the data we need from the database
+    db = get_db()
     cur = db.execute('SELECT entry.entry_value FROM entry, forecast \
-                      WHERE forecast.forecast_id = entry.forecast_id  \
-                      AND forecast.cfg_name == (?) \
-                      AND forecast.forecast_type == "actual";', [cfg_name])
-
+                          WHERE forecast.forecast_id = entry.forecast_id  \
+                          AND forecast.cfg_name == (?) \
+                          AND forecast.forecast_type == "actual";', [cfg_name])
     entries = cur.fetchall()
-
 
     # here we are doing the actual calculations
     cfg_values = get_list_dict_values(entries)
+
     stat_values = {}
-
     stat_values['cfg_name'] = cfg_name
-    stat_values['service_level'] = float(service_level[0])/100
-    stat_values['lead_time'] = int(lead_time[0])
+    stat_values['service_level'] = float(service_level) / 100
+    stat_values['lead_time'] = int(lead_time)
     stat_values['forecast'] = int(forecast)
-
     try:
         stat_values['stv_dev'] =  statistics.pstdev(cfg_values)/5
         stat_values['avg_demand'] = (sum(cfg_values)/len(cfg_values))/5
@@ -185,7 +210,6 @@ def cfg(cfg_name="FP_S2240T_R_CFG_LAX_Site", lead_time="1", service_level="90", 
                                        * norm.ppf(stat_values['service_level']) \
                                        * (math.sqrt(stat_values['lead_time'])+1))  \
                                        + (stat_values['avg_demand']*(stat_values['lead_time']+1))
-        print (stat_values['avg_demand']*(stat_values['lead_time']+1))
         stat_values['inventory'] = stat_values['safety_stock'] + stat_values['forecast']
         stat_values['reorder'] = stat_values['avg_demand'] * stat_values['lead_time'] \
                                  + stat_values['service_level'] * stat_values['stv_dev'] \
@@ -201,7 +225,10 @@ def cfg(cfg_name="FP_S2240T_R_CFG_LAX_Site", lead_time="1", service_level="90", 
         stat_values['dsi'] = 0
         print "failed in calculations"
 
-    return render_template('cfg.html', cfgs=cfgs, stat_values=stat_values)
+    return stat_values
+
+
+
 
 @app.route('/cfg_vars', methods=['POST'])
 def cfg_vars():
@@ -247,9 +274,16 @@ def commodity(com_id=''):
     cur = db.execute('select * from cfg where com_id = ?', [commodity[0]['com_id']])
     cfgs= cur.fetchall()
 
+    dsi_dict = {}
+
+    #creating key value pairs of cfg:dsi for categorization on the front end
+    for cfg in cfgs:
+        result =  get_cfg_stats(cfg['cfg_name'], 1, 95, 2862)
+        dsi_dict[cfg['cfg_name']] = result['dsi']
+
     return render_template('commodity.html', commodity=commodity, \
                            commodities=commodities, \
-                           cfgs=cfgs)
+                           dsi_dict = dsi_dict)
 
 
 def dict_factory(cursor, row):

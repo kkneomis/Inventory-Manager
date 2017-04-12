@@ -15,14 +15,14 @@ def actual_sales(cfg):
                       and forecast.cfg_name ==  (?)', [cfg])
 
     sales = cur.fetchall()
-    sales = cheat(sales)
+    sales = clean_week(sales)
 
     return sales
 
 
-def cheat(data):
+def clean_week(data):
     '''
-    Make the data digestable for Morris graphing
+    Change the week name to make it digestable for Morris graphing
     data expected in json format
     '''
     for item in data:

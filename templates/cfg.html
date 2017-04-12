@@ -1,12 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-    <style>
-     .well-head{
-         background: #367fa9;
-         color: #fff;
-         text-align: center;
-     }
-    </style>
+
       <!-- Content Header (Page header) -->
     <section class="content-header">
       <h1>
@@ -124,10 +118,27 @@
                      </div>
                 </div>
 
+                  <!-- solid sales graph -->
+          <div class="box box-solid bg-teal-gradient">
+            <div class="box-header">
+              <i class="fa fa-th"></i>
 
+              <h3 class="box-title">{{ graph_data['cfg_name'] }}</h3>
 
-
-
+              <div class="box-tools pull-right">
+                <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+                <button type="button" class="btn bg-teal btn-sm" data-widget="remove"><i class="fa fa-times"></i>
+                </button>
+              </div>
+            </div>
+            <div class="box-body border-radius-none">
+              <div class="chart" id="line-chart{{ graph_data['cfg_name'] }}" style="height: 250px;"></div>
+            </div>
+            <!-- /.box-body -->
+            <!-- /.box-footer -->
+          </div>
+          <!-- /.box -->
                 </div>
             </div>
             <!-- /.box-body -->
@@ -136,7 +147,6 @@
 
         </div>
         <!-- /.col (left) -->
-         </div>
     </section>
 
 
@@ -148,6 +158,28 @@
           //Initialize Select2 Elements
           $(".select2").select2();
       });
+        "use strict";
+
+          var line = new Morris.Line({
+            element: 'line-chart{{ graph_data['cfg_name'] }}',
+            resize: true,
+            data: {{ graph_data|tojson }},
+            xkey: 'week_id',
+            ykeys: ['entry_value', 'rec_inventory'],
+            labels: ['Sales' +
+            '' +
+            '', 'Rec.'],
+            lineColors: ['#efefef', "#0066ff"],
+            lineWidth: 2,
+            hideHover: 'auto',
+            gridTextColor: "#fff",
+            gridStrokeWidth: 0.4,
+            pointSize: [4,0],
+            pointStrokeColors: ["#efefef"],
+            gridLineColor: "#efefef",
+            gridTextFamily: "Open Sans",
+            gridTextSize: 10
+          });
 
 
 </script>
