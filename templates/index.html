@@ -1,176 +1,270 @@
 {% extends "layout.html" %}
 {% block body %}
-
-<!-- Content Wrapper. Contains page content -->
-
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-      <h1>
-        Dashboard
-        <small>Control panel</small>
-      </h1>
-      <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Dashboard</li>
-      </ol>
-    </section>
-
-    <!-- Main content -->
-    <section class="content">
-      <!-- Small boxes (Stat box) -->
-      <div class="row">
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-aqua">
-            <div class="inner">
-              <h3>150</h3>
-
-              <p>Days Sales Inventory</p>
-            </div>
-            <div class="icon">
-              <i class="ion ion-stats-bars"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-green">
-            <div class="inner">
-              <h3><sup style="font-size: 20px">$</sup>53,000</h3>
-
-              <p>Costs</p>
-            </div>
-            <div class="icon">
-              <i class="ion ion-pricetags"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-yellow">
-            <div class="inner">
-              <h3>44</h3>
-
-              <p>User Registrations</p>
-              <p>User Registrations</p>
-            </div>
-            <div class="icon">
-              <i class="ion ion-person-add"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-red">
-            <div class="inner">
-              <h3>65</h3>
-
-              <p>Unique Visitors</p>
-            </div>
-            <div class="icon">
-              <i class="ion ion-pie-graph"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <!-- ./col -->
-      </div>
-      <!-- /.row -->
-      <!-- Main row -->
-      <div class="row">
-        {%  for item in sales %}
-        <!-- right col (We are only adding the ID to make the widgets sortable)-->
-        <section class="col-lg-5 connectedSortable">
+ <!-- Main content --->
 
 
-          <!-- solid sales graph -->
-          <div class="box box-solid bg-teal-gradient">
-            <div class="box-header">
-              <i class="fa fa-th"></i>
+<style>
+/*
+ * Documentation specific stylesheet
+ */
+.content-wrapper p {
+  padding: 0 10px;
+  font-size: 16px;
+  position: relative;
+  z-index: 30;
+}
+.bring-up {
+  position: relative;
+  z-index: 30;
+}
+.nth-2-center > tbody > tr > td:last-of-type {
+  text-align: center!important;
+}
+.content {
+  font-size: 16px;
+  z-index: 500;
+}
 
-              <h3 class="box-title">{{ item['cfg_name'] }}</h3>
+#components > h3 {
+  font-size: 25px;
+  color: #000;
+}
 
-              <div class="box-tools pull-right">
-                <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
-                </button>
-                <button type="button" class="btn bg-teal btn-sm" data-widget="remove"><i class="fa fa-times"></i>
-                </button>
-              </div>
-            </div>
-            <div class="box-body border-radius-none">
-              <div class="chart" id="line-chart{{ item['cfg_name'] }}" style="height: 250px;"></div>
-            </div>
-            <!-- /.box-body -->
-            <!-- /.box-footer -->
-          </div>
-          <!-- /.box -->
+#components > h4 {
+  font-size: 20px;
+  color: #000;
+}
+ul {
+  margin-bottom: 20px;
+}
+.page-header {
+  /*border-bottom: 1px solid #ddd;        */
+  margin: 20px 0 10px 0!important;
+  position: relative;
+  z-index: 1;
+  font-size: 30px;
+}
+.page-header span,
+.page-header a {
+  z-index: 5;
+  display: block;
+  background-color: #ecf0f5;
+  color: #000;
+}
+.page-header span::before,
+.page-header a::before {
+  content: '#';
+  font-size: 25px;
+  margin-right: 10px;
+  color: #3c8dbc;
+}
+.page-header:before,
+#components > h3:before {
+  display: block;
+  content: " ";
+  margin-top: -60px;
+  height: 60px;
+  visibility: hidden;
+  z-index: -10;
+}
 
+.lead {
+  font-size: 18px;
+  font-weight: 400;
+}
+.eg{
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-block;
+  background: #d2d6de;
+  padding: 5px;
+  border-bottom-right-radius: 3px;
+  border-top-left-radius: 3px;
+  border-bottom: 1px solid #d2d6dc;
+  border-right: 1px solid #d2d6dc;
+}
+.eg + * {
+  margin-top: 30px;
+}
+.content {
+  padding: 10px 25px;
+}
+.hierarchy {
+  background: #333;
+  color: #fff;
+}
+.plugins-list li {
+  width: 50%;
+  float: left;
+}
+pre {
+  border: none;
+}
 
-        </section>
-          {%  endfor %}
-        <!-- right col -->
-      </div>
-      <!-- /.row (main row) -->
+.sidebar {
+  margin-top: 0;
+  padding-top: 0!important;
+}
+.box .main-header {
+  z-index: 1000;
+  position: relative;
+}
+.treeview .nav li a:hover,
+.treeview .nav li a:active {
+  background: transparent;
+}
+p {
+  padding: 0!important;
+}
+/* Hemisu Light */
+/* Original theme - http://noahfrederick.com/vim-color-scheme-hemisu/ */
+pre.prettyprint {
+  background: white;
+  font-family: Menlo, 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  border: 1px solid #dedede!important;
+  padding: 10px;
+  max-height: 300px;
+  width: auto;
+  overflow: auto!important;
+}
+pre.prettyprint > code {
+  width: auto;
+  overflow: auto!important;
+}
 
-    </section>
+.pln {
+  color: #111111;
+}
 
+@media screen {
+  .str {
+    color: #739200;
+  }
 
+  .kwd {
+    color: #739200;
+  }
 
-    <script>
+  .com {
+    color: #999999;
+  }
 
-                       /*
- * Author: Abdullah A Almsaeed
- * Date: 4 Jan 2014
- * Description:
- *      This is a demo file used only for the main dashboard (index.html)
- **/
+  .typ {
+    color: #ff0055;
+  }
 
-$(function () {
+  .lit {
+    color: #538192;
+  }
 
-  "use strict";
+  .pun {
+    color: #111111;
+  }
 
-    //Make the dashboard widgets sortable Using jquery UI
-  $(".connectedSortable").sortable({
-    placeholder: "sort-highlight",
-    connectWith: ".connectedSortable",
-    handle: ".box-header, .nav-tabs",
-    forcePlaceholderSize: true,
-    zIndex: 999999
-  });
-  $(".connectedSortable .box-header, .connectedSortable .nav-tabs-custom").css("cursor", "move");
+  .opn {
+    color: #111111;
+  }
 
+  .clo {
+    color: #111111;
+  }
 
-  {%  for item in sales %}
-  var line = new Morris.Line({
-    element: 'line-chart{{ item['cfg_name'] }}',
-    resize: true,
-    data: {{ item|tojson }},
-    xkey: 'week_id',
-    ykeys: ['entry_value'],
-    labels: ['Sales' +
-    '' +
-    '', "Recommendation"],
-    lineColors: ['#efefef'],
-    lineWidth: 2,
-    hideHover: 'auto',
-    gridTextColor: "#fff",
-    gridStrokeWidth: 0.4,
-    pointSize: 4,
-    pointStrokeColors: ["#efefef"],
-    gridLineColor: "#efefef",
-    gridTextFamily: "Open Sans",
-    gridTextSize: 10
-  });
-   {%  endfor %}
+  .tag {
+    color: #111111;
+  }
 
+  .atn {
+    color: #739200;
+  }
 
-});
-    </script>
+  .atv {
+    color: #ff0055;
+  }
 
+  .dec {
+    color: #111111;
+  }
+
+  .var {
+    color: #111111;
+  }
+
+  .fun {
+    color: #538192;
+  }
+}
+@media print, projection {
+  .str {
+    color: #006600;
+  }
+
+  .kwd {
+    color: #006;
+    font-weight: bold;
+  }
+
+  .com {
+    color: #600;
+    font-style: italic;
+  }
+
+  .typ {
+    color: #404;
+    font-weight: bold;
+  }
+
+  .lit {
+    color: #004444;
+  }
+
+  .pun, .opn, .clo {
+    color: #444400;
+  }
+
+  .tag {
+    color: #006;
+    font-weight: bold;
+  }
+
+  .atn {
+    color: #440044;
+  }
+
+  .atv {
+    color: #006600;
+  }
+}
+/* Specify class=linenums on a pre to get line numbering */
+ol.linenums {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* IE indents via margin-left */
+li.L0,
+li.L1,
+li.L2,
+li.L3,
+li.L4,
+li.L5,
+li.L6,
+li.L7,
+li.L8,
+li.L9 {
+  /* */
+}
+
+/* Alternate shading for lines */
+li.L1,
+li.L3,
+li.L5,
+li.L7,
+li.L9 {
+  /* */
+}
+
+</style>
 {% endblock %}

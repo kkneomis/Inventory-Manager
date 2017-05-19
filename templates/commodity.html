@@ -10,6 +10,16 @@
     .nav-stacked{
         word-wrap: break-word;
     }
+
+    .cat_83{
+        background: #red;
+    }
+    .cat_95{
+        background: #e6e6ff;
+    }
+    .cat_99{
+        background: #b3b3ff;
+    }
     </style>
       <!-- Content Header (Page header) -->
     <section class="content-header">
@@ -51,7 +61,6 @@
                         <option value="98">98%</option>
                     </select>
                   </div--->
-                    <input type="submit" class="btn btn-primary btn-block" value="Calculate">
                 </form>
             </div>
             <!-- /.box-body -->
@@ -78,9 +87,9 @@
                             <div class="box-footer no-padding">
                               <ul class="nav nav-stacked">
                                 {% for cfg in dsi_dict %}
-                                          {% if dsi_dict[cfg] < 3 %}
-                                            <li><a href="/cfg?cfg_name={{ cfg }}&lead_time=1&service_level=90&forecast=100">{{ cfg }}
-                                                <span class="pull-right badge bg-blue">{{ "{0:,.2f}".format(dsi_dict[cfg]) }}</span></a></li>
+                                          {% if dsi_dict[cfg][0] < 3 %}
+                                            <li ><a href="/cfg?cfg_id={{ cfg }}&lead_time={{ dsi_dict[cfg][1]['lead_time'] }}&service_level={{ dsi_dict[cfg][1]['service_level'] }}&forecast={{ dsi_dict[cfg][1]['forecast'] }}">{{ cfg }}
+                                                <span class="pull-right badge bg-blue">{{ "{0:,.2f}".format(dsi_dict[cfg][0]) }}</span></a></li>
                                           {% endif %}
                                 {%  endfor %}
                               </ul>
@@ -94,14 +103,15 @@
                     <!-- Add the bg color to the header using any of the bg-* classes -->
                         <div class="widget-user-header bg-yellow">
                           <!-- /.widget-user-image -->
-                          <h5 class="widget-user-desc">DSI < 3</h5>
+                          <h5 class="widget-user-desc">DSI < 3 and > 5</h5>
                             </div>
                             <div class="box-footer no-padding">
                               <ul class="nav nav-stacked">
                                 {% for cfg in dsi_dict %}
-                                          {% if (dsi_dict[cfg] > 3) and (dsi_dict[cfg] < 5)  %}
-                                            <li><a href="/cfg?cfg_name={{ cfg }}&lead_time=1&service_level=90&forecast=100">{{ cfg }}
-                                                <span class="pull-right badge bg-blue">{{ "{0:,.2f}".format(dsi_dict[cfg]) }}</span></a></li>
+                                          {% if (dsi_dict[cfg][0] > 3) and (dsi_dict[cfg][0] < 5)  %}
+                                            <li><a href="/cfg?cfg_id={{ cfg }}&lead_time={{ dsi_dict[cfg][1]['lead_time'] }}
+                                            &service_level={{ dsi_dict[cfg][1]['service_level'] }}&forecast={{ dsi_dict[cfg][1]['forecast'] }}">{{ cfg }}
+                                                <span class="pull-right badge bg-blue">{{ "{0:,.2f}".format(dsi_dict[cfg][0]) }}</span></a></li>
                                           {% endif %}
                                 {%  endfor %}
                               </ul>
@@ -120,9 +130,9 @@
                             <div class="box-footer no-padding">
                               <ul class="nav nav-stacked">
                                 {% for cfg in dsi_dict %}
-                                          {% if dsi_dict[cfg] > 5 %}
-                                            <li><a href="/cfg?cfg_name={{ cfg }}&lead_time=1&service_level=90&forecast=100">{{ cfg }}
-                                                <span class="pull-right badge bg-blue">{{ "{0:,.2f}".format(dsi_dict[cfg]) }}</span></a></li>
+                                          {% if dsi_dict[cfg][0] > 15 %}
+                                            <li><a href="/cfg?cfg_id={{ cfg }}&lead_time={{ dsi_dict[cfg][1]['lead_time'] }} &service_level={{ dsi_dict[cfg][1]['service_level'] }}&forecast={{ dsi_dict[cfg][1]['forecast'] }}">{{ cfg }}
+                                                <span class="pull-right badge bg-blue">{{ "{0:,.2f}".format(dsi_dict[cfg][0]) }}</span></a></li>
                                           {% endif %}
                                 {%  endfor %}
                               </ul>

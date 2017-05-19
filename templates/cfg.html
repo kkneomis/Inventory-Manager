@@ -26,10 +26,10 @@
             <form action="{{ url_for('cfg_vars') }}"  method="post" >
                   <div class="form-group">
                     <label>Common Functional Group</label>
-                    <select name="cfg_name" class="form-control select2" id="dynamic_select" style="width: 100%;">
-                         <option value="{{ stat_values.cfg_name }}">{{ stat_values.cfg_name }}</option>
+                    <select name="cfg_id" class="form-control select2" id="dynamic_select" style="width: 100%;">
+                         <option value="{{ stat_values.cfg_id }}">{{ stat_values.cfg_id }}</option>
                         {% for cfg in cfgs %}
-                            <option value="{{ cfg.cfg_name }}">{{ cfg.cfg_name }}</option>
+                            <option value="{{ cfg.cfg_id }}">{{ cfg.cfg_id }}</option>
                         {% endfor %}
                     </select>
                   </div>
@@ -39,7 +39,7 @@
                   </div>
                   <div class="form-group">
                     <label>Service Level (%)</label>
-                    <input type="number" name="service_level" class="form-control" value="{{ stat_values.service_level*100 }}">
+                    <input type="number" name="service_level"  class="form-control" value="{{ stat_values.service_level*100 }}"  >
                   </div>
                   <div class="form-group">
                     <label>Forecast (days)</label>
@@ -58,7 +58,7 @@
 
           <div class="box box-danger">
             <div class="box-header">
-              <h3 class="box-title">Output: {{ stat_values.cfg_name }}</h3>
+              <h3 class="box-title">Output: {{ stat_values.cfg_id }}</h3>
             </div>
             <div class="box-body">
                 <div class="row">
@@ -123,7 +123,7 @@
             <div class="box-header">
               <i class="fa fa-th"></i>
 
-              <h3 class="box-title">{{ graph_data['cfg_name'] }}</h3>
+              <h3 class="box-title">{{ graph_data['cfg_id'] }}</h3>
 
               <div class="box-tools pull-right">
                 <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -133,7 +133,7 @@
               </div>
             </div>
             <div class="box-body border-radius-none">
-              <div class="chart" id="line-chart{{ graph_data['cfg_name'] }}" style="height: 250px;"></div>
+              <div class="chart" id="line-chart{{ graph_data['cfg_id'] }}" style="height: 250px;"></div>
             </div>
             <!-- /.box-body -->
             <!-- /.box-footer -->
@@ -161,7 +161,7 @@
         "use strict";
 
           var line = new Morris.Line({
-            element: 'line-chart{{ graph_data['cfg_name'] }}',
+            element: 'line-chart{{ graph_data['cfg_id'] }}',
             resize: true,
             data: {{ graph_data|tojson }},
             xkey: 'week_id',

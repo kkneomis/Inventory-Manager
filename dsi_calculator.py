@@ -3,6 +3,7 @@ import math
 import statistics
 import sqlite3
 import load_csv as lc
+import numpy as np
 import json
 from scipy.stats import norm
 import requests
@@ -40,16 +41,6 @@ def allowed_file(filename):
 
 @app.route('/')
 def home():
-    db = get_db()
-    cur = db.execute('SELECT * FROM cfg')
-    cfgs = cur.fetchall()
-
-    all_sales_data = []
-
-    #cfg = cfgs[0]['cfg_name']
-    #json_data = ds.actual_sales(cfg)
-
-
 
     return render_template('index.html', sales=[])
 
@@ -66,6 +57,9 @@ def upload_file():
 
 @app.route('/data')
 def show_data():
+    '''
+    Show commodities and CFGs present in the database
+    '''
     db = get_db()
     cur = db.execute('SELECT * FROM commodity')
     commodities = cur.fetchall()
@@ -98,19 +92,25 @@ def process_file():
             print 'File not valid.'
             pass
 
+        if "cost" in filename:
+            # how to handle cost data files
+            sql = lc.get_costs(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        else:
+            # how to handle forecast files
+            sql = lc.get_forecast_inserts(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
         try:
-            sql = lc.get_inserts(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            # create sql file and execute sql entries
             sql_filename = filename.split('.')[0] + '.sql'
             with open(os.path.join(app.config['SQL_FOLDER'], sql_filename), 'w') as file:
                 file.write(str(sql))
 
+            print "Executing sql..."
             init_db('sql/'+sql_filename)
-
             flash("Your data has been imported.")
         except:
-            print "it did not work"
+            print "Failed to import sql from csv"
             flash('Loading sql from csv did not work :(...try again')
-
 
         # Redirect the user to the upload page
         return redirect(url_for('upload_file'))
@@ -125,11 +125,17 @@ def process_file():
 # an image, that image is going to be show after the upload
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
+    """
+    This route is expecting a parameter containing the name
+    of a file. Then it will locate that file on the upload
+    directory and show it on the browser, so if the user uploads
+    an image, that image is going to be show after the upload
+    """
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
-# list the files which are in directories and subdirectories.
 def make_tree(path):
+    """list the files which are in directories and subdirectories."""
     try:
         lst = os.listdir(path)
     except OSError:
@@ -141,79 +147,73 @@ def make_tree(path):
 
 
 @app.route('/cfg')
-def cfg(cfg_name="FP_S2240T_R_CFG_LAX_Site", lead_time="1", service_level="90", forecast="100"):
-    '''
+def cfg(cfg_id="FP_S2240T_R_CFG_LAX_Site", lead_time="35", service_level="95", forecast="700"):
+    """
     Take in a cfg and output inventory level and dsi
-    :param cfg_name:
-    :param site:
-    :return:
-    '''
+    """
 
     # getting new parameters from the url
     # the come as tuples
-    if request.args.get('cfg_name'):
-        cfg_name = request.args.get('cfg_name')
-        lead_time = request.args.get('lead_time')[0][0],
+    if request.args.get('cfg_id'):
+        cfg_id = request.args.get('cfg_id')
+        lead_time = request.args.get('lead_time'),
         service_level = request.args.get('service_level'),
         forecast = request.args.get('forecast')
 
-    #get the list of cfgs so that we can choose
+    # get the list of cfgs so that we can choose
     db = get_db()
     cur = db.execute('SELECT * FROM cfg')
     cfgs = cur.fetchall()
+    # get the corresponding cfg
+    cur = db.execute('SELECT * FROM cfg where cfg_id=?', [cfg_id])
+    current_cfg = cur.fetchall()
 
+    commodity = current_cfg[0]['com_id']
     # perform the calculations
-    stat_values = get_cfg_stats(cfg_name, int(lead_time[0]), float(service_level[0]), int(forecast))
-    graph_data =  ds.actual_sales(cfg_name)
+    stat_values = get_cfg_stats(cfg_id, int(lead_time[0]), service_level[0], int(forecast))
+    graph_data = ds.actual_sales(cfg_id)
 
-    #we want to visualize our recommendation
-    #this allows us to graph the recommended inventory level
+    # we want to visualize our recommendation
+    # this allows us to graph the recommended inventory level
     for item in graph_data:
         item['rec_inventory'] = int(stat_values['inventory'])
 
     return render_template('cfg.html', cfgs=cfgs, stat_values=stat_values, graph_data=graph_data)
 
 
-
-def get_cfg_stats(cfg_name, lead_time, service_level, forecast):
-    '''
+def get_cfg_stats(cfg_id, lead_time, service_level, forecast):
+    """
     Take in a cfg and some parameters
-    This is where the math the formula is done
+    This is where the math for the formula is done
     Return a dictionary including inventory and dsi
-    :param cfg_name:
-    :param lead_time:
-    :param service_level:
-    :param forecast:
-    :return:
-    '''
+    """
     # first we get the data we need from the database
     db = get_db()
     cur = db.execute('SELECT entry.entry_value FROM entry, forecast \
                           WHERE forecast.forecast_id = entry.forecast_id  \
-                          AND forecast.cfg_name == (?) \
-                          AND forecast.forecast_type == "actual";', [cfg_name])
+                          AND forecast.cfg_id == (?) \
+                          AND forecast.forecast_type == "actual";', [cfg_id])
     entries = cur.fetchall()
-
     # here we are doing the actual calculations
-    cfg_values = get_list_dict_values(entries)
+    cfg_values = get_list_dict_values(entries, 'entry_value')
 
-    stat_values = {}
-    stat_values['cfg_name'] = cfg_name
-    stat_values['service_level'] = float(service_level) / 100
-    stat_values['lead_time'] = int(lead_time)
-    stat_values['forecast'] = int(forecast)
+    stat_values = {'cfg_id': cfg_id,
+                   'service_level': float(service_level) / 100,
+                   'lead_time': int(lead_time),
+                   'forecast': int(forecast)}
+
     try:
         stat_values['stv_dev'] =  statistics.pstdev(cfg_values)/5
         stat_values['avg_demand'] = (sum(cfg_values)/len(cfg_values))/5
         stat_values['total_demand'] = sum(cfg_values)/5
-        stat_values['safety_stock'] =  (stat_values['stv_dev']  \
+        stat_values['safety_stock'] =  ((stat_values['stv_dev']  \
                                        * norm.ppf(stat_values['service_level']) \
                                        * (math.sqrt(stat_values['lead_time'])+1))  \
-                                       + (stat_values['avg_demand']*(stat_values['lead_time']+1))
+                                       + (stat_values['avg_demand']*(stat_values['lead_time']+1)))/5
         stat_values['inventory'] = stat_values['safety_stock'] + stat_values['forecast']
-        stat_values['reorder'] = stat_values['avg_demand'] * stat_values['lead_time'] \
-                                 + stat_values['service_level'] * stat_values['stv_dev'] \
-                                 * math.sqrt(stat_values['lead_time'])
+        stat_values['reorder'] = (stat_values['avg_demand'] * (stat_values['lead_time']+5) \
+                                 + norm.ppf(stat_values['service_level']) * stat_values['stv_dev'] \
+                                 * (math.sqrt(stat_values['lead_time']) + 5))/5
         stat_values['dsi'] = stat_values['inventory']/stat_values['forecast']
     except:
         # if the math fails, we'll set everything so 0 to avoid an errors
@@ -222,8 +222,9 @@ def get_cfg_stats(cfg_name, lead_time, service_level, forecast):
         stat_values['total_demand'] = 0
         stat_values['safety_stock'] = 0
         stat_values['inventory'] = 0
+        stat_values['reorder'] = 0
         stat_values['dsi'] = 0
-        print "failed in calculations"
+        print "Something went wrong in executing our formula"
 
     return stat_values
 
@@ -232,32 +233,54 @@ def get_cfg_stats(cfg_name, lead_time, service_level, forecast):
 
 @app.route('/cfg_vars', methods=['POST'])
 def cfg_vars():
-    '''
+    """
     get methods from cfg form
-    :return:
-    '''
-    cfg_name =  request.form['cfg_name']
+    this is called when the form on the cfg page is called
+    """
+    cfg_id =  request.form['cfg_id']
     lead_time = request.form['lead_time']
     service_level = request.form['service_level']
     forecast = request.form['forecast']
 
     return redirect(url_for('cfg',
-                            cfg_name = cfg_name,
+                            cfg_id = cfg_id,
                             lead_time = lead_time,
                             service_level = service_level,
                             forecast = forecast
                             ))
 
 
-def get_list_dict_values(entries):
-    '''
+def get_list_dict_values(entries, key):
+    """
     input is a list of key pair values
     :return: list of values
-    '''
+    turn output of a sql query into a normal list
+    """
     cfg_values = []
     for entry in entries:
-        cfg_values.append(entry['entry_value'])
+        cfg_values.append(entry[key])
     return cfg_values
+
+
+def get_service_level(cfg, commodity):
+    """
+    both inputs should be strings
+    return service of a cfg based on percentage of cost
+    eg. top 85%:high, next 15%: medium, bottom 15%:low
+    """
+    db = get_db()
+    cur = db.execute('select cfg_cost from cfg where com_id=?', [commodity])
+    all_commodity_costs = get_list_dict_values(cur.fetchall(), 'cfg_cost')
+    cur = db.execute('select cfg_cost from cfg where cfg_id=?', [cfg])
+    cfg_cost = cur.fetchall()[0]['cfg_cost']
+
+    a = np.array(all_commodity_costs)
+    if cfg_cost > np.percentile(a, 20):
+        return 83
+    elif cfg_cost > np.percentile(a, 5):
+        return 95
+    else:
+        return 99
 
 
 
@@ -269,18 +292,20 @@ def commodity(com_id=''):
     cur = db.execute('select * from commodity where com_id = (?)', [com_id])
     commodity = cur.fetchall()
 
-
-    #this should instead be the logic for grouping DSI
+    # this should instead be the logic for grouping DSI
     cur = db.execute('select * from cfg where com_id = ?', [commodity[0]['com_id']])
     cfgs= cur.fetchall()
 
     dsi_dict = {}
 
-    #creating key value pairs of cfg:dsi for categorization on the front end
+    # creating key value pairs of cfg:dsi for categorization on the front end
     for cfg in cfgs:
-        result =  get_cfg_stats(cfg['cfg_name'], 1, 95, 2862)
-        dsi_dict[cfg['cfg_name']] = result['dsi']
+        service_level = get_service_level(cfg['cfg_id'], commodity[0]['com_id'])
+        cfg['service_level'] = service_level
+        result =  get_cfg_stats(cfg['cfg_id'], cfg['lead_time'], service_level, cfg['forecast'])
+        dsi_dict[cfg['cfg_id']] = [result['dsi'],cfg]
 
+    #print json.dumps(dsi_dict, sort_keys=True, indent = 4, separators = (',', ': '))
     return render_template('commodity.html', commodity=commodity, \
                            commodities=commodities, \
                            dsi_dict = dsi_dict)
@@ -318,7 +343,8 @@ def close_db(error):
         g.sqlite_db.close()
 
 
-def init_db(file):
+def init_db(file='tables.sql'):
+    """reset the database"""
     db = get_db()
     with app.open_resource(file, mode='r') as f:
         db.cursor().executescript(f.read())
@@ -328,9 +354,15 @@ def init_db(file):
 @app.cli.command('initdb')
 def initdb_command():
     """Initializes the database."""
-    init_db('tables.sql')
+    init_db()
     print 'Initialized the database.'
 
+
+@app.route('/initdb_from_page', methods=['POST'])
+def initdb_from_page():
+    """Initializes the database from the GUI."""
+    init_db()
+    return redirect(url_for('upload_file'))
 
 if __name__ == '__main__':
     app.run()

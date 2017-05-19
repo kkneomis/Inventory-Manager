@@ -8,12 +8,33 @@
 		<div class="row">
 			<div class="col-md-4">
 				<div class="info-box">
-					<span class="info-box-icon bg-yellow"><i class="fa fa-files-o"></i></span>
+					<span class="info-box-icon bg-yellow"><i class="fa fa-bar-chart"></i></span>
 					<div class="info-box-content">
-						<span class="info-box-number">Upload a file</span> <span></span>
-						<form action="uploader" enctype="multipart/form-data" method="post">
+						<span class="info-box-number">Upload Forecast Data</span> <span></span>
+						<form action="uploader" id="upload" enctype="multipart/form-data" method="post">
+                            <p>Be sure to name your file commodityId_commodityName</p>
+                            <p>Ex: <b>hdd</b>_Hard_Drive.csv or <b>fpm</b>_Flat_Panel_Monitor.csv </p>
 							<span><input name="file" type="file"><br>
 							<input type="submit" value="Upload" class="btn btn-primary"></span>
+						</form><span></span>
+					</div><!-- /.info-box-content -->
+				</div>
+                <div class="info-box">
+					<span class="info-box-icon bg-blue"><i class="fa fa-dollar"></i></span>
+					<div class="info-box-content">
+						<span class="info-box-number">Upload Cost Data</span> <span></span>
+						<form action="uploader" id="upload" enctype="multipart/form-data" method="post">
+							<span><input name="file" type="file"><br>
+							<input type="submit" value="Upload" class="btn btn-primary"></span>
+						</form><span></span>
+					</div><!-- /.info-box-content -->
+				</div>
+                <div class="info-box">
+					<span class="info-box-icon bg-red"><i class="fa fa-warning"></i></span>
+					<div class="info-box-content">
+						<span class="info-box-number">Clear Database</span> <span></span>
+						<form action="initdb_from_page" enctype="multipart/form-data" method="post">
+							<input type="submit" onclick="return confirm('Are you sure?');" value="Reset my database" class="btn btn-danger"></span>
 						</form><span></span>
 					</div><!-- /.info-box-content -->
 				</div>
@@ -39,4 +60,11 @@
 			</div><!-- /.row -->
 		</div>
 	</div>
+
+    <script>
+        $('#upload').submit(function( event ) {
+           Pace.start()
+        };
+    </script>
+
 {% endblock %}

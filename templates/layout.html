@@ -15,6 +15,8 @@
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='morris.css') }}">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='jquery-jvectormap-1.2.2.css') }}">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='select2.min.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='jquery-confirm.min.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='pace.min.css') }}">
 
     <script src="{{url_for('static', filename='jquery.js')}}"></script>
      <script src="{{url_for('static', filename='jquery-ui.js')}}"></script>
@@ -27,6 +29,8 @@
      <script src="{{url_for('static', filename='bootstrap3-wysihtml5.all.min.js')}}"></script>
      <script src="{{url_for('static', filename='bootstrap3-wysihtml5.all.min.js')}}"></script>
      <script src="{{url_for('static', filename='select2.min.js')}}"></script>
+     <script src="{{url_for('static', filename='jquery-confirm.min.js')}}"></script>
+     <script src="{{url_for('static', filename='pace.min.js')}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
@@ -49,9 +53,9 @@
     <!-- Logo -->
     <a href="index2.html" class="logo">
       <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini"><b>I</b>MAN</span>
+      <span class="logo-mini"><b>D</b>IM</span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"><b>INV</b>Man</span>
+      <span class="logo-lg"><b>Dell</b> Inventory</span>
     </a>
     <!-- Header Navbar: style can be found in header.less -->
     <nav class="navbar navbar-static-top">
@@ -100,7 +104,7 @@
             <li><a href="/upload"><i class="fa fa-circle-o text-aqua"></i>Upload</a></li>
             <li><a href="/data"><i class="fa fa-circle-o text-red"></i>Data</a></li>
             <li><a href="/commodity/hdd"><i class="fa fa-circle-o text-q"></i>Commodity</a></li>
-            <li><a href="/cfg?cfg_name=FP_P2217H_CFG_FOXJUA_Site&lead_time=1&service_level=90&forecast=100"><i class="fa fa-circle-o text-q"></i>CFG view</a></li>
+            <li><a href="/cfg?cfg_id=HDD_1TB_SATA_6G_DT_CFG_FOXJUA_Site&lead_time=1&service_level=90&forecast=100"><i class="fa fa-circle-o text-q"></i>CFG view</a></li>
           </ul>
         </li>
 
@@ -134,12 +138,9 @@
 
 </div>
 <!-- ./wrapper -->
-
-<!-- Morris.js charts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
-
-
-
+<script>
+    $(document).ajaxStart(function() { Pace.restart(); });
+</script>
 
 </body>
 </html>
