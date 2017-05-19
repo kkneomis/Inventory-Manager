@@ -3,9 +3,9 @@
 This inventory management tool is built in python (flask) and sql. 
 
 ### Dependencies
-Python
-Flask
-Sqlite3 (or some other relational database)
+1. Python
+2. Flask
+3. Sqlite3 (or some other relational database)
 
 ### Functionality
 
@@ -25,5 +25,5 @@ The app will run on your localhost port 5000 unless you specify otherwise in the
 Be sure that your input files are in csv and not in xls format. 
 
 ```load_csv.py``` contains many of the functions that convert the inputs from csv to sql.
-```data_search.py`` converts sql data to correct json to be visualized in on javascript. 
+```data_search.py``` converts sql data to correct json to be visualized in on javascript. 
 
