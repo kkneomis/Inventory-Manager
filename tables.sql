@@ -43,17 +43,3 @@ create table entry(
 );
 
 
-INSERT INTO week(week_id) VALUES ('NovW117');
-INSERT INTO week(week_id) VALUES ('NovW217');
-INSERT INTO week(week_id) VALUES ('NovW317');
-INSERT INTO week(week_id) VALUES ('NovW417');
-INSERT INTO week(week_id) VALUES ('DecW117');
-INSERT INTO week(week_id) VALUES ('DecW217');
-INSERT INTO week(week_id) VALUES ('DecW317');
-INSERT INTO week(week_id) VALUES ('DecW417');
-INSERT INTO week(week_id) VALUES ('DecW517');
-INSERT INTO week(week_id) VALUES ('JanW117');
-INSERT INTO week(week_id) VALUES ('JanW217');
-INSERT INTO week(week_id) VALUES ('JanW317');
-INSERT INTO week(week_id) VALUES ('JanW417');
-INSERT INTO week(week_id) VALUES ('JanW517');

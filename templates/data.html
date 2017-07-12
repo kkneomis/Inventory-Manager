@@ -30,10 +30,12 @@
                   <th>Commodity Name</th>
                 </tr>
                   {% for commodity in commodities %}
-                <tr>
-                  <td>{{ commodity.com_id }}</td>
-                  <td>{{ commodity.com_name }}</td>
+
+                <tr onclick="window.document.location='/commodity/{{ commodity.com_id }}';" style="cursor:pointer">
+                      <td>{{ commodity.com_id }}</td>
+                      <td>{{ commodity.com_name }}</td>
                 </tr>
+
                   {% endfor %}
               </table>
             </div>
@@ -54,10 +56,12 @@
                   <th>Commodity Id</th>
                 </tr>
                  {% for cfg in cfgs %}
-                <tr>
+
+                     <tr>
                   <td>{{ cfg.cfg_id }}</td>
                   <td>{{ cfg.com_id }}</td>
                 </tr>
+
                   {% endfor %}
               </table>
             </div>

@@ -21,9 +21,9 @@ def get_forecast_inserts(file):
 
     ## get the weeks
     ## TODO find a way to only get the new weeks
-    #for week in get_weeks(file):
+    for week in get_weeks(file):
         # print "INSERT INTO week(week_id) VALUES ('%s');" % (week)
-        # queries += "INSERT INTO week(week_id) VALUES ('%s');\n" % (week)
+        queries += "INSERT INTO week(week_id) VALUES ('%s');\n" % (week)
 
     for line in get_forecast(file):
         queries += "INSERT INTO forecast(forecast_id, forecast_site, cfg_id, version_name, forecast_type) VALUES ('%s', '%s','%s', '%s', '%s');\n" % (

@@ -106,7 +106,7 @@ def process_file():
                 file.write(str(sql))
 
             print "Executing sql..."
-            init_db('sql/'+sql_filename)
+            init_db('sql/'+sql_filename, by_line=True)
             flash("Your data has been imported.")
         except:
             print "Failed to import sql from csv"
@@ -343,12 +343,23 @@ def close_db(error):
         g.sqlite_db.close()
 
 
-def init_db(file='tables.sql'):
+def init_db(file='tables.sql', by_line=False):
     """reset the database"""
     db = get_db()
     with app.open_resource(file, mode='r') as f:
-        db.cursor().executescript(f.read())
-    db.commit()
+        if by_line:
+            for line in f.readlines():
+                try:
+                    db.cursor().executescript(line)
+                    db.commit()
+                except Exception as e:
+                    print e
+                    print "There was an error executing the line: %s" % line
+        else:
+            db.cursor().executescript(f.read())
+            db.commit()
+
+
 
 
 @app.cli.command('initdb')
